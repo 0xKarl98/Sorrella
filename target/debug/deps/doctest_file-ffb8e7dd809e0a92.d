@@ -1,0 +1,8 @@
+/Users/josephnoorchashm/Desktop/SorellaLabs/GitHub/rust-interviews/rust-take-home/target/debug/deps/libdoctest_file-ffb8e7dd809e0a92.dylib: /Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/lib.rs /Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/logic.rs /Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/tokenmanip.rs /Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/../README.md
+
+/Users/josephnoorchashm/Desktop/SorellaLabs/GitHub/rust-interviews/rust-take-home/target/debug/deps/doctest_file-ffb8e7dd809e0a92.d: /Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/lib.rs /Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/logic.rs /Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/tokenmanip.rs /Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/../README.md
+
+/Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/lib.rs:
+/Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/logic.rs:
+/Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/tokenmanip.rs:
+/Users/josephnoorchashm/.cargo/registry/src/index.crates.io-6f17d22bba15001f/doctest-file-1.0.0/src/../README.md:
