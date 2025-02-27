@@ -3,6 +3,10 @@ In this task, you will be using anvil (as a ETH backend) and REVM to do storage 
 smart contract to return a true value. You will need to make sure that you have foundry setup on your computer.
 If you don't, go [here](https://book.getfoundry.sh/getting-started/installation) and install via your favourite method.
 
+### Submission
+1) Create a git repo with the solution and share it with our githubs: @jnoorchashm37 and @Will-Smith11
+2) Send us an email with the subject line `Rust Interview - [Name]` at joseph@sorellalabs.xyz and will@sorellalabs.xyz
+
 ## Scope
 ### Setup
 The environment given to you will have some problems while building. This is on purpose and is expected that you are able to fix and
