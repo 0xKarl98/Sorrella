@@ -32,7 +32,8 @@ pub mod gate_lock {
 
 ### Constraints 
 1) No setup code can be modified. The only place you can add your code is in the `solve` function, and subsequent helper functions.
-2) Must use REVM, in the solution.
+2) the contract bytecode / logic cannot be changed.
+3) Must execute the `isSolved` function using REVM in order to verify the solution.
 
 ### Goals
 1) get codebase to compile by setting up a build script to automatically setup contract bindings
