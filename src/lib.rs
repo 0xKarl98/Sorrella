@@ -1,12 +1,15 @@
 pub mod contract_bindings;
 pub mod environment_deployment;
 
-use alloy::primitives::U160;
-use contract_bindings::gate_lock::GateLock::Payload;
+use std::fmt::Debug;
+
+use alloy::primitives::{Address, U160, U256};
+use environment_deployment::{AnvilControls, deploy_lock_contract, spin_up_anvil_instance};
 use rand::{self, Rng};
+use revm::DatabaseRef;
 
 /// generates values for smart_contract
-pub fn fetch_values() -> Vec<Payload> {
+fn fetch_values() -> Vec<Payload> {
     let mut rng = rand::rng();
     let iter_cnt: usize = rng.random_range(10..100);
 
@@ -16,4 +19,17 @@ pub fn fetch_values() -> Vec<Payload> {
             Payload { firstValue: rng.random(), secondValue: U160::from_be_bytes(bytes) }
         })
         .collect::<Vec<_>>()
+}
+
+pub async fn deploy_setup_with_solver<F, O>(f: F) -> eyre::Result<bool>
+where
+    F: Fn(Address, AnvilControls) -> O,
+    O: Future<Output = eyre::Result<bool>>,
+{
+    let controls = spin_up_anvil_instance().await?;
+    let payload = fetch_values();
+
+    let deploy_address = deploy_lock_contract(&controls, payload).await?;
+
+    f(deploy_address, controls).await
 }
