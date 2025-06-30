@@ -4,27 +4,27 @@ use alloy::{
     primitives::{Address, B256, U256},
     providers::{Identity, Provider, RootProvider, builder, fillers::*},
     signers::local::PrivateKeySigner,
-    transports::BoxTransport
+    transports::BoxTransport,
 };
 use eyre::bail;
 use revm::{
     DatabaseRef,
-    primitives::{self, Bytecode}
+    primitives::{self, Bytecode},
 };
 
-use crate::contract_bindings::{self, gate_lock::GateLock::Payload};
+// use crate::contract_bindings::{self, gate_lock::GateLock::Payload};
 
 pub type AnvilProvider = FillProvider<
     JoinFill<
         JoinFill<
             Identity,
-            JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>
+            JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>,
         >,
-        WalletFiller<EthereumWallet>
+        WalletFiller<EthereumWallet>,
     >,
     RootProvider<BoxTransport>,
     BoxTransport,
-    Ethereum
+    Ethereum,
 >;
 
 pub async fn spin_up_anvil_instance() -> eyre::Result<AnvilControls> {
@@ -45,18 +45,15 @@ pub async fn spin_up_anvil_instance() -> eyre::Result<AnvilControls> {
 
 pub async fn deploy_lock_contract(
     controls: &AnvilControls,
-    payload: Vec<Payload>
+    payload: Vec<crate::Payload>,
 ) -> eyre::Result<Address> {
-    let deploy =
-        contract_bindings::gate_lock::GateLock::deploy(controls.provider.clone(), payload).await?;
-
-    Ok(*deploy.address())
+    Ok(Address::default())
 }
 
 pub struct AnvilControls {
     pub provider: AnvilProvider,
-    pub wallet:   EthereumWallet,
-    pub instance: AnvilInstance
+    pub wallet: EthereumWallet,
+    pub instance: AnvilInstance,
 }
 
 impl DatabaseRef for AnvilControls {
@@ -64,7 +61,7 @@ impl DatabaseRef for AnvilControls {
 
     fn basic_ref(
         &self,
-        address: Address
+        address: Address,
     ) -> Result<Option<revm::primitives::AccountInfo>, Self::Error> {
         let acc = async_to_sync(self.provider.get_account(address).latest().into_future())?;
         let code = async_to_sync(self.provider.get_code_at(address).latest().into_future())?;
@@ -74,7 +71,7 @@ impl DatabaseRef for AnvilControls {
             code_hash: acc.code_hash,
             balance: acc.balance,
             nonce: acc.nonce,
-            code
+            code,
         }))
     }
 
@@ -88,9 +85,9 @@ impl DatabaseRef for AnvilControls {
             self.provider
                 .get_block_by_number(
                     alloy::rpc::types::BlockNumberOrTag::Number(number),
-                    alloy::rpc::types::BlockTransactionsKind::Hashes
+                    alloy::rpc::types::BlockTransactionsKind::Hashes,
                 )
-                .into_future()
+                .into_future(),
         )?;
 
         let Some(block) = acc else { bail!("failed to load block") };
