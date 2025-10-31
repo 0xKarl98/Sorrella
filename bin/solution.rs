@@ -3,10 +3,9 @@ use alloy::sol_types::SolCall;
 use evm_knowledge::{contract_bindings::gate_lock::GateLock, deploy_setup_with_solver};
 use revm::{
     Database, DatabaseRef, Evm,
-    primitives::{AccountInfo, Bytecode, Env, ExecutionResult, Output, TransactTo},
+    primitives::{AccountInfo, Bytecode, ExecutionResult, Output, TransactTo},
 };
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
@@ -28,7 +27,7 @@ async fn solve<DB: DatabaseRef>(contract_address: Address, db: DB) -> eyre::Resu
     let total_length: usize = total_length_u256
         .try_into()
         .map_err(|_| eyre::eyre!("totalLength too large"))?;
-    println!("📊 Total length: {}", total_length);
+    println!("Total length: {}", total_length);
 
     if total_length == 0 {
         println!("Total length is 0, nothing to solve.");
@@ -44,7 +43,7 @@ async fn solve<DB: DatabaseRef>(contract_address: Address, db: DB) -> eyre::Resu
     let mut used_slots = Vec::new();
     let mut current_slot = U256::ZERO; // Constructor starts from slot 0
 
-    println!("🏗️ Simulating construction process...");
+    println!("Simulating construction process...");
 
     for _i in 0..total_length {
         println!("The slot key to be written : {}", current_slot);
@@ -138,10 +137,10 @@ async fn solve<DB: DatabaseRef>(contract_address: Address, db: DB) -> eyre::Resu
     // ===================================================================
     // Write modified values to storage
     // ===================================================================
-    println!("\n🔧 Starting storage manuplation...");
+    println!("\nStarting storage manuplation...");
 
     for (&slot_key, &(first_value, second_value_u160)) in &slot_data {
-        println!("🔧 Setting is_unlocked=true for slot key 0x{:x}", slot_key);
+        println!("Setting is_unlocked=true for slot key 0x{:x}", slot_key);
 
         // Calculate actual storage slot for the mapping
         let storage_slot = calculate_mapping_slot(slot_key, value_map_slot);
@@ -169,29 +168,29 @@ async fn solve<DB: DatabaseRef>(contract_address: Address, db: DB) -> eyre::Resu
     // Verify using isSolved 
     // ===================================================================
 
-    println!("\n🔍 Verifying storage modifications before isSolved call:");
+    println!("\n Verifying storage modifications before isSolved call:");
     for (&slot_key, _) in &slot_data {
         let storage_slot = calculate_mapping_slot(slot_key, value_map_slot);
         let current_value = writable_db.storage_ref(contract_address, storage_slot)?;
         let is_unlocked = (current_value & U256::from(1)) != U256::ZERO;
         println!(
-            "🔍 Slot key 0x{:x} -> storage slot {}: is_unlocked = {}",
+            "Slot key 0x{:x} -> storage slot {}: is_unlocked = {}",
             slot_key, storage_slot, is_unlocked
         );
     }
 
     let ids: Vec<U256> = used_slots; 
-    println!("🎯 Calling isSolved with {} ids", ids.len());
-    println!("🎯 First few ids: {:?}", &ids[..std::cmp::min(10, ids.len())]);
+    println!("Calling isSolved with {} ids", ids.len());
+    println!("First few ids: {:?}", &ids[..std::cmp::min(10, ids.len())]);
 
     // Verify totalLength in contract 
     let contract_total_length = writable_db.storage_ref(contract_address, total_length_slot)?;
-    println!("🔍 Contract totalLength: {}", contract_total_length);
-    println!("🔍 Our ids length: {}", ids.len());
+    println!("Contract totalLength: {}", contract_total_length);
+    println!("Our ids length: {}", ids.len());
 
     let call_result = call_is_solved_via_revm(&writable_db, contract_address, ids)?;
 
-    println!("🏆 isSolved result: {}", call_result);
+    println!("IsSolved result: {}", call_result);
     Ok(call_result)
 }
 
@@ -218,7 +217,7 @@ fn call_is_solved_via_revm<DB: DatabaseRef>(
 ) -> eyre::Result<bool> {
 
     // Manually check each id's is_unlocked status before isSolved call
-    println!("🔍 Manual verification of all ids before isSolved:");
+    println!("Manual verification of all ids before isSolved:");
     let value_map_slot = U256::from(2);
     for (i, &id) in ids.iter().enumerate() {
         let storage_slot = calculate_mapping_slot(id, value_map_slot);
@@ -257,8 +256,8 @@ fn call_is_solved_via_revm<DB: DatabaseRef>(
 
     match result.result {
         ExecutionResult::Success { output: Output::Call(data), .. } => {
-            println!("🔍 isSolved call succeeded, return data: {:?}", data);
-            println!("🔍 Return data length: {}", data.len());
+            println!("isSolved call succeeded, return data: {:?}", data);
+            println!("Return data length: {}", data.len());
             // Parse boolean return value (32 bytes, last byte contains the boolean)
             if data.len() >= 32 {
                 let result_bool = data[31] != 0;
@@ -296,14 +295,6 @@ impl<DB: DatabaseRef> WritableDatabase<DB> {
         Self { inner, storage_changes: HashMap::new() }
     }
 
-    fn storage(&self, address: Address, index: U256) -> eyre::Result<U256> {
-        if let Some(&value) = self.storage_changes.get(&(address, index)) {
-            Ok(value)
-        } else {
-            Ok(self.inner.storage_ref(address, index).unwrap_or_default())
-        }
-    }
-
     fn set_storage(&mut self, address: Address, index: U256, value: U256) -> eyre::Result<()> {
         self.storage_changes.insert((address, index), value);
         Ok(())
@@ -328,21 +319,16 @@ impl<DB: DatabaseRef> Database for &WritableDatabase<DB> {
     fn storage(&mut self, address: Address, index: U256) -> Result<U256, Self::Error> {
         if let Some(&value) = self.storage_changes.get(&(address, index)) {
             println!(
-                "🔍 REVM reading MODIFIED storage: address=0x{:x}, index={}, value=0x{:x}",
+                "REVM reading MODIFIED storage: address=0x{:x}, index={}, value=0x{:x}",
                 address, index, value
             );
-            println!("🔍 REVM MODIFIED - is_unlocked: {}", (value & U256::from(1)) != U256::ZERO);
+            println!("REVM MODIFIED - is_unlocked: {}", (value & U256::from(1)) != U256::ZERO);
             Ok(value)
         } else {
             let value = self
                 .inner
                 .storage_ref(address, index)
                 .map_err(|_| eyre::eyre!("Database error"))?;
-            println!(
-                "🔍 REVM reading ORIGINAL storage: address=0x{:x}, index={}, value=0x{:x}",
-                address, index, value
-            );
-            println!("🔍 REVM ORIGINAL - is_unlocked: {}", (value & U256::from(1)) != U256::ZERO);
             Ok(value)
         }
     }
