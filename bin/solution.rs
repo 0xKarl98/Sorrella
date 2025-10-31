@@ -51,13 +51,16 @@ async fn solve<DB: DatabaseRef>(contract_address: Address, db: DB) -> eyre::Resu
         // Compute the actual storage slot for the mapping
         let storage_slot = calculate_mapping_slot(current_slot, value_map_slot);
 
-        // Read struct Values 
+        // Read struct Values
         let current_value = writable_db.storage_ref(contract_address, storage_slot)?;
         println!("Read Value (storage slot {}): 0x{:x}", storage_slot, current_value);
 
         // Check if the slot is empty
         if current_value == U256::ZERO {
-            return Err(eyre::eyre!("slot {} is empty, constructor should have written data", current_slot));
+            return Err(eyre::eyre!(
+                "slot {} is empty, constructor should have written data",
+                current_slot
+            ));
         }
 
         // Analysis Values struct layout
@@ -75,7 +78,6 @@ async fn solve<DB: DatabaseRef>(contract_address: Address, db: DB) -> eyre::Resu
             u64::try_from(first_value_u256).map_err(|_| eyre::eyre!("firstValue overflow"))?;
         println!("convert to u64: {}", first_value);
 
-
         let second_value_mask = (U256::from(1) << 160) - U256::from(1);
         let shifted_value = current_value >> 64;
         let second_value_u160 = shifted_value & second_value_mask;
@@ -91,8 +93,7 @@ async fn solve<DB: DatabaseRef>(contract_address: Address, db: DB) -> eyre::Resu
         );
 
         slot_data.insert(current_slot, (first_value, second_value_u160));
-        used_slots.push(current_slot); 
-
+        used_slots.push(current_slot);
 
         println!("=== Jump logic debugging ===");
         println!("firstValue: {}", first_value);
@@ -111,13 +112,15 @@ async fn solve<DB: DatabaseRef>(contract_address: Address, db: DB) -> eyre::Resu
 
         // Check if it will cause an infinite loop.
         if next_slot == current_slot {
-            println!("Warning: If the next slot is the same as the current slot, it may cause an infinite loop.");
+            println!(
+                "Warning: If the next slot is the same as the current slot, it may cause an infinite loop."
+            );
         }
 
         current_slot = next_slot;
     }
 
-    // Check if the amount of slot mathes totalLength 
+    // Check if the amount of slot mathes totalLength
     assert_eq!(
         used_slots.len(),
         total_length,
@@ -165,7 +168,7 @@ async fn solve<DB: DatabaseRef>(contract_address: Address, db: DB) -> eyre::Resu
     println!("Total length: {}, Used slots length: {}", total_length, used_slots.len());
 
     // ===================================================================
-    // Verify using isSolved 
+    // Verify using isSolved
     // ===================================================================
 
     println!("\n Verifying storage modifications before isSolved call:");
@@ -179,11 +182,11 @@ async fn solve<DB: DatabaseRef>(contract_address: Address, db: DB) -> eyre::Resu
         );
     }
 
-    let ids: Vec<U256> = used_slots; 
+    let ids: Vec<U256> = used_slots;
     println!("Calling isSolved with {} ids", ids.len());
     println!("First few ids: {:?}", &ids[..std::cmp::min(10, ids.len())]);
 
-    // Verify totalLength in contract 
+    // Verify totalLength in contract
     let contract_total_length = writable_db.storage_ref(contract_address, total_length_slot)?;
     println!("Contract totalLength: {}", contract_total_length);
     println!("Our ids length: {}", ids.len());
@@ -215,7 +218,6 @@ fn call_is_solved_via_revm<DB: DatabaseRef>(
     contract_address: Address,
     ids: Vec<U256>,
 ) -> eyre::Result<bool> {
-
     // Manually check each id's is_unlocked status before isSolved call
     println!("Manual verification of all ids before isSolved:");
     let value_map_slot = U256::from(2);
