@@ -1,15 +1,18 @@
+# Stable rustfmt configuration for Rust 1.85.0
 max_width = 100
 chain_width = 60
-error_on_unformatted = false
-wrap_comments = true
 use_small_heuristics = "Max"
 use_field_init_shorthand = true
-trailing_semicolon = false
-trailing_comma = "Never"
-imports_granularity = "Crate"
-condense_wildcard_suffixes = true
-enum_discrim_align_threshold = 20
-struct_field_align_threshold = 20
-format_strings = true
-reorder_impl_items = true
-group_imports = "StdExternalCrate"
+
+# The following options are unstable and only available in nightly:
+# wrap_comments = true
+# format_strings = true
+# imports_granularity = "Crate"
+# group_imports = "StdExternalCrate"
+# reorder_impl_items = true
+# struct_field_align_threshold = 20
+# enum_discrim_align_threshold = 20
+# trailing_semicolon = false
+# trailing_comma = "Never"
+# condense_wildcard_suffixes = true
+# error_on_unformatted = false
