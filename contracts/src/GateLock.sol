@@ -22,18 +22,29 @@ contract GateLock {
     mapping(bytes32 id => uint128 random) internal _c;
     uint internal totalLength;
 
+    //give initialPayload , slot is changing according to this condition : 
+    //cur.firstValue % 2 == 0 
+    //Suppose we have initPayload = [{100, 0x123}, {201, 0x456}, {88, 0x789}];  
     constructor(Payload[] memory initPayload) {
         uint length = initPayload.length;
         totalLength = length;
 
         uint slot = 0;
 
+        //loop 3 times
         for (uint i = 0; i < length; i++) {
             Payload memory cur = initPayload[i];
             Values memory s = Values(cur.firstValue, cur.secondValue, false);
-
+            
+            //1. valueMap[0] = {100, 0x123, false} 
+            //2. valueMap[100] = {201, 0x456, false} 
+            //3. valueMap[0x456] = {88, 0x789, false} 
             valueMap[slot] = s;
-
+            
+            //0. slot == 0 (initial case )
+            //1. slot == 100 , cur.firstValue == 100 
+            //2. slot == 201 , cur.secondValue == 0x456
+            //3. slot == 88  , cur.firstValue  == 88
             if (cur.firstValue % 2 == 0) {
                 slot = cur.firstValue;
             } else {
@@ -42,6 +53,9 @@ contract GateLock {
         }
     }
 
+
+    //ids must contain all the keys in constructor functions 
+    //And all corresponding is_unlocked must be true 
     function isSolved(uint[] calldata ids) public view returns (bool res) {
         res = true;
 

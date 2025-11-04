@@ -12,7 +12,7 @@ use revm::{
     primitives::{self, Bytecode},
 };
 
-// use crate::contract_bindings::{self, gate_lock::GateLock::Payload};
+use crate::contract_bindings::gate_lock::GateLock;
 
 pub type AnvilProvider = FillProvider<
     JoinFill<
@@ -47,7 +47,16 @@ pub async fn deploy_lock_contract(
     controls: &AnvilControls,
     payload: Vec<crate::Payload>,
 ) -> eyre::Result<Address> {
-    Ok(Address::default())
+    // Convert our Payload to the contract's Payload format
+    let contract_payloads: Vec<GateLock::Payload> = payload
+        .into_iter()
+        .map(|p| GateLock::Payload { firstValue: p.firstValue, secondValue: p.secondValue })
+        .collect();
+
+    // Deploy the contract with the payload
+    let contract = GateLock::deploy(&controls.provider, contract_payloads).await?;
+
+    Ok(*contract.address())
 }
 
 pub struct AnvilControls {

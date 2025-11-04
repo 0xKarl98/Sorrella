@@ -2,11 +2,19 @@ pub mod contract_bindings;
 pub mod environment_deployment;
 
 use std::fmt::Debug;
+use std::future::Future;
 
 use alloy::primitives::{Address, U160, U256};
 use environment_deployment::{AnvilControls, deploy_lock_contract, spin_up_anvil_instance};
 use rand::{self, Rng};
 use revm::DatabaseRef;
+
+/// Payload structure matching the Solidity contract
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Payload {
+    pub firstValue: u64,
+    pub secondValue: U160,
+}
 
 /// generates values for smart_contract
 fn fetch_values() -> Vec<Payload> {
